@@ -1,0 +1,148 @@
+ZECKENDORF BALANCING MAP — REPOSITORY CONTENTS
+================================================
+
+This repository accompanies the preprint "Fixed Points of the Zeckendorf
+Balancing Map and their Asymptotic Ratios." It contains the preprint
+itself, the scripts used to independently verify its numerical claims,
+and a set of supplementary robustness/extension experiments that go
+beyond what is reported in the paper.
+
+All scripts are pure Python 3, no external dependencies required.
+Run any script with:  python3 <script_name>.py
+
+
+/preprint/
+----------
+The paper itself.
+
+  Fixed_Points_of_the_Zeckendorf_Balancing_Map_Preprint.tex
+      LaTeX source of the preprint. Includes the standing hypothesis
+      paragraph following Conjecture 1 (unique simple dominant root of
+      strictly maximal modulus, strictly increasing sequence, unique
+      greedy representations), together with a short remark on the
+      period-g generalization for recurrences with a reducible
+      characteristic polynomial.
+
+  Fixed_Points_of_the_Zeckendorf_Balancing_Map_Preprint.pdf
+      Compiled PDF of the above, current final version.
+
+
+/verification/
+---------------
+Scripts that reproduce the paper's central numerical claims. These are
+the primary "run this to check my results" entry points.
+
+  zeckendorf_balancing_map_complete_verification.py
+      The main verification script. For all seven bases discussed in
+      the paper (Fibonacci, Tribonacci, Padovan, Pell, Tetranacci,
+      Slow, Fast) and for n from 10 up to 20000, it:
+        - builds the basis and the balancing map,
+        - checks whether the candidate construction v_cand is an
+          exact fixed point of the map (confirms: yes only for
+          Fibonacci and Slow; no, but numerically indistinguishable
+          in ratio, for the other five),
+        - iterates the map from random starting strings to find the
+          dominant attractor,
+        - reproduces Tables 1-3 of the preprint to the reported
+          precision, using exact Python integer arithmetic throughout
+          (no floating-point rounding in the recurrence, greedy
+          expansion, or value function).
+      This is the script whose output the paper's tables are drawn
+      from.
+
+  n1000.py
+      A second, independently written implementation of the same
+      balancing map and the same seven bases (n up to 1000), used as
+      a cross-check. It reaches the same fixed-point ratios as
+      zeckendorf_balancing_map_complete_verification.py despite being
+      a separate piece of code, which is stronger evidence than either
+      script alone.
+
+
+/extensions/
+------------
+Supplementary experiments that probe the conjecture beyond what is
+reported in the preprint: more bases, different densities, larger n,
+non-standard greedy variants, and randomly generated recurrences.
+These are NOT required to verify the paper's claims, but are included
+for anyone who wants to stress-test the conjecture further.
+
+  01_extended_bases.py
+      Extends the test set to 5-, 6-, 7-, 8-bonacci, Lucas numbers,
+      and several hand-picked Pell-like bases with alpha > 2,
+      including one with a negative coefficient. Confirms the
+      alpha<2 / alpha>2 dichotomy continues to hold.
+
+  02_density_scan.py
+      For fixed n, scans the candidate construction across a wide
+      range of weight densities rho (not just rho = 1/2) and shows
+      the normalised value stays locked to the theoretical limit
+      across almost the entire range [0.05, 0.95], not only at the
+      specific density used in the paper's construction.
+
+  03_large_n.py
+      Runs the dominant-attractor experiment at large n (up to
+      several thousand) confirming ratio convergence remains stable
+      well beyond the range tabulated in the paper.
+
+  04_non_unique_and_signed.py
+      Tests ZLRS bases (zero-coefficient recurrences, e.g. Padovan)
+      for secondary/non-unique attractors at small n, and tests
+      signed-coefficient recurrences (including one degenerate case
+      whose dominant root has multiplicity, where growth becomes
+      polynomial rather than exponential and the ratio genuinely
+      diverges with n, as expected once the Pisot/exponential-growth
+      hypothesis fails).
+
+  05_non_greedy.py
+      Compares the standard greedy expansion against lazy and dual
+      expansions, showing the choice of expansion rule materially
+      changes the fixed-point structure -- i.e. the greedy convention
+      used throughout the paper is doing real work, not an arbitrary
+      choice.
+
+  06_random_recurrences.py
+      Randomly samples coefficient vectors for order-2, order-3, and
+      order-4 recurrences, keeps only those producing a valid
+      strictly increasing positive basis, and checks whether the
+      observed regime and attractor ratios match the predicted
+      alpha<2 / alpha>2 formulas.
+      NOTE: this is a corrected version. The original script's
+      validity filter checked only that terms generated BY the
+      recurrence were strictly increasing; it never checked that the
+      seed/initial values themselves were increasing. This let at
+      least one invalid basis (coefficients [0,2,0,3], seeds
+      [1,2,1,1], which produces the non-monotonic sequence
+      1,2,1,1,5,8,13,...) pass the filter and get reported as a
+      apparent mismatch with the conjecture. This version adds an
+      explicit monotonicity check across the seed block before the
+      recurrence is run, so such cases are correctly rejected before
+      they ever reach the balancing map. With the fix applied, no
+      counterexamples to the conjecture have been found by this
+      sampler.
+
+  07_weighted_digits.py
+      Generalizes the alphabet from {0,1} to {0,...,D} and shows the
+      limiting ratio scales in the expected way with D.
+
+  08_continuous_analogue.py
+      A floating-point continuous analogue of the map using pure
+      geometric weights alpha^i. Reproduces the same dichotomy, but
+      note it is the only script here that uses floats rather than
+      exact integers, and shows visible precision breakdown at large
+      n for some alpha values -- a numerical artifact of the float
+      implementation, not a mathematical phenomenon. Included for
+      completeness, not as independent verification.
+
+
+HOW TO REPRODUCE THE PAPER'S HEADLINE RESULT
+---------------------------------------------
+  cd verification
+  python3 zeckendorf_balancing_map_complete_verification.py
+
+This will print Tables 1-3 (or the data they were built from) directly
+to the terminal. Expect a runtime of a few minutes for the full n=20000
+sweep across all seven bases.
+
+
+
